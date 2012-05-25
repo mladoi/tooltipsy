@@ -4,6 +4,7 @@
  * - alignTo: "element" or "cursor" (Defaults to "element")
  * - offset: Tooltipsy distance from element or mouse cursor, dependent on alignTo setting. Set as array [x, y] (Defaults to [0, -1])
  * - content: HTML or text content of tooltip. Defaults to "" (empty string), which pulls content from target element's title attribute
+ * - load: function(element, tooltip, callback) to load content when tooltip is shown
  * - show: function(event, tooltip) to show the tooltip. Defaults to a show(100) effect
  * - hide: function(event, tooltip) to hide the tooltip. Defaults to a fadeOut(100) effect
  * - delay: A delay in milliseconds before showing a tooltip. Set to 0 for no delay. Defaults to 200
@@ -27,6 +28,7 @@
         this.random = parseInt(Math.random()*10000);
         this.ready = false;
         this.shown = false;
+        this.loaded = false;
         this.width = 0;
         this.height = 0;
         this.delaytimer = null;
@@ -151,6 +153,13 @@
         }
         base.$tipsy.css({top: tip_position[1] + 'px', left: tip_position[0] + 'px'});
         base.settings.show(e, base.$tipsy.stop(true, true));
+        if (base.loaded === false) {
+        	base.loaded = true;
+        	base.settings.load(base.$el,base.$tip, function(){
+        		base.show(e);
+        	});
+        }
+        
     };
 
     $.tooltipsy.prototype.hide = function (e) {
@@ -204,6 +213,9 @@
         alignTo: 'element',
         offset: [0, -1],
         content: '',
+        load: function($el, $tip, cb) {
+        	cb();
+        },
         show: function (e, $el) {
             $el.fadeIn(100);
         },
