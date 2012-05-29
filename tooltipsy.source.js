@@ -152,11 +152,13 @@
             ];
         }
         base.$tipsy.css({top: tip_position[1] + 'px', left: tip_position[0] + 'px'});
+        base.shown = true;
         base.settings.show(e, base.$tipsy.stop(true, true));
         if (base.loaded === false) {
         	base.loaded = true;
         	base.settings.load(base.$el,base.$tip, function(){
-        		base.show(e);
+        		if (base.shown) 
+        			base.show(e);
         	});
         }
         
@@ -164,11 +166,9 @@
 
     $.tooltipsy.prototype.hide = function (e) {
         var base = this;
-
         if (base.ready === false) {
             return;
         }
-
         if (e && e.relatedTarget === base.$tip[0]) {
             base.$tip.bind('mouseleave', function (e) {
                 if (e.relatedTarget === base.$el[0]) {
@@ -178,6 +178,7 @@
             });
             return;
         }
+        base.shown = false;
         base.settings.hide(e, base.$tipsy.stop(true, true));
     };
 
