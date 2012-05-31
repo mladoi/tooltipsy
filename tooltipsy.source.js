@@ -4,7 +4,7 @@
  * - alignTo: "element" or "cursor" (Defaults to "element")
  * - offset: Tooltipsy distance from element or mouse cursor, dependent on alignTo setting. Set as array [x, y] (Defaults to [0, -1])
  * - content: HTML or text content of tooltip. Defaults to "" (empty string), which pulls content from target element's title attribute
- * - load: function(element, tooltip, callback) to load content when tooltip is shown
+ * - load: function(element, callback) to load content before showing tooltip, callback is called with loaded content
  * - show: function(event, tooltip) to show the tooltip. Defaults to a show(100) effect
  * - hide: function(event, tooltip) to hide the tooltip. Defaults to a fadeOut(100) effect
  * - delay: A delay in milliseconds before showing a tooltip. Set to 0 for no delay. Defaults to 200
@@ -54,11 +54,11 @@
                 }
                 if (base.settings.delay > 0) {
                     base.delaytimer = window.setTimeout(function () {
-                        base.show(e);
+                        base.initShow(e);
                     }, base.settings.delay);
                 }
                 else {
-                    base.show(e);
+                    base.initShow(e);
                 }
             }, function (e) {
                 if (base.settings.showEvent === 'click' && base.$el[0].tagName == 'A') {
@@ -76,11 +76,11 @@
                 }
                 if (base.settings.delay > 0) {
                     base.delaytimer = window.setTimeout(function () {
-                        base.show(e);
+                        base.initShow(e);
                     }, base.settings.delay);
                 }
                 else {
-                    base.show(e);
+                    base.initShow(e);
                 }
             }).bind(base.settings.hideEvent, function (e) {
                 if (base.settings.showEvent === 'click' && base.$el[0].tagName == 'A') {
@@ -93,6 +93,20 @@
         }
     };
 
+    $.tooltipsy.prototype.initShow = function(e) {
+		var base = this;
+		if (base.loaded === false) {
+			base.settings.load(base.$el, function(html){
+				base.loaded = true;
+				if (html)
+					base.settings.content = html;	
+				base.show(e);
+			});
+		} else {
+			base.show(e);		
+		}
+    };
+    
     $.tooltipsy.prototype.show = function (e) {
         var base = this;
 
@@ -153,15 +167,7 @@
         }
         base.$tipsy.css({top: tip_position[1] + 'px', left: tip_position[0] + 'px'});
         base.shown = true;
-        base.settings.show(e, base.$tipsy.stop(true, true));
-        if (base.loaded === false) {
-        	base.loaded = true;
-        	base.settings.load(base.$el,base.$tip, function(){
-        		if (base.shown) 
-        			base.show(e);
-        	});
-        }
-        
+        base.settings.show(e, base.$tipsy.stop(true, true));        
     };
 
     $.tooltipsy.prototype.hide = function (e) {
@@ -214,7 +220,7 @@
         alignTo: 'element',
         offset: [0, -1],
         content: '',
-        load: function($el, $tip, cb) {
+        load: function($el, cb) {
         	cb();
         },
         show: function (e, $el) {
