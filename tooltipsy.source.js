@@ -28,6 +28,7 @@
         this.random = parseInt(Math.random()*10000);
         this.ready = false;
         this.shown = false;
+        this.preventShow = false;
         this.loaded = false;
         this.width = 0;
         this.height = 0;
@@ -95,12 +96,14 @@
 
     $.tooltipsy.prototype.initShow = function(e) {
 		var base = this;
+		base.preventShow = false;
 		if (base.loaded === false) {
 			base.settings.load(base.$el, function(html){
 				base.loaded = true;
 				if (html)
-					base.settings.content = html;	
-				base.show(e);
+					base.settings.content = html;
+				if (!base.preventShow)
+					base.show(e);
 			});
 		} else {
 			base.show(e);		
@@ -172,6 +175,7 @@
 
     $.tooltipsy.prototype.hide = function (e) {
         var base = this;
+        base.preventShow = true;
         if (base.ready === false) {
             return;
         }
